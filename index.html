@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>春节舞龙舞狮喜庆对联游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #FF4500 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 喜庆背景装饰 */
+        .background-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .lantern {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background: radial-gradient(ellipse at center, #FF6347 0%, #DC143C 100%);
+            border-radius: 50% 50% 50% 50%;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            animation: swing 3s ease-in-out infinite;
+        }
+
+        .lantern::before {
+            content: '福';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #FFD700;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .lantern::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 30px;
+            background: linear-gradient(to bottom, #FFD700, #FFA500);
+            border-radius: 0 0 10px 10px;
+        }
+
+        @keyframes swing {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        /* 游戏主容器 */
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* 标题区域 */
+        .title-area {
+            text-align: center;
+            padding: 20px;
+            background: rgba(139, 0, 0, 0.8);
+            border-bottom: 4px solid #FFD700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-title {
+            font-size: 36px;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .game-subtitle {
+            font-size: 18px;
+            color: #FFA500;
+        }
+
+        /* 分数和状态面板 */
+        .status-panel {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(139, 0, 0, 0.9);
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 3px solid #FFD700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .score-display {
+            font-size: 24px;
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .couplet-count {
+            font-size: 18px;
+            color: #FFA500;
+        }
+
+        /* 游戏区域 */
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 140px);
+            margin-top: 10px;
+        }
+
+        /* 舞龙 */
+        .dragon {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        .dragon:hover {
+            transform: scale(1.1);
+        }
+
+        .dragon-head {
+            width: 120px;
+            height: 100px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 50% 50% 40% 40%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            animation: dragonDance 2s ease-in-out infinite;
+        }
+
+        .dragon-eye {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #FF0000;
+            border-radius: 50%;
+            top: 30px;
+        }
+
+        .dragon-eye.left { left: 25px; }
+        .dragon-eye.right { right: 25px; }
+
+        .dragon-eye::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+            top: 6px;
+            left: 6px;
+        }
+
+        .dragon-horn {
+            position: absolute;
+            width: 15px;
+            height: 40px;
+            background: linear-gradient(to top, #FFD700, #FF4500);
+            top: -30px;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .dragon-horn.left { left: 20px; transform: rotate(-20deg); }
+        .dragon-horn.right { right: 20px; transform: rotate(20deg); }
+
+        .dragon-mouth {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background: #FF4500;
+            border-radius: 0 0 30px 30px;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .dragon-beard {
+            position: absolute;
+            width: 80px;
+            height: 20px;
+            background: #FFD700;
+            border-radius: 10px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .dragon-body {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 50%;
+            left: 20px;
+            top: 50px;
+        }
+
+        .dragon-body:nth-child(2) { left: 80px; top: 70px; transform: scale(0.9); }
+        .dragon-body:nth-child(3) { left: 130px; top: 85px; transform: scale(0.8); }
+        .dragon-body:nth-child(4) { left: 170px; top: 95px; transform: scale(0.7); }
+
+        @keyframes dragonDance {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-15px) rotate(5deg); }
+            50% { transform: translateY(-25px) rotate(0deg); }
+            75% { transform: translateY(-15px) rotate(-5deg); }
+        }
+
+        /* 舞狮 */
+        .lion {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        .lion:hover {
+            transform: scale(1.1);
+        }
+
+        .lion-head {
+            width: 110px;
+            height: 95px;
+            background: linear-gradient(135deg, #FF6347 0%, #DC143C 100%);
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 99, 71, 0.8);
+            animation: lionDance 2s ease-in-out infinite;
+        }
+
+        .lion-eye {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: #FFF;
+            border-radius: 50%;
+            top: 30px;
+            border: 3px solid #FFD700;
+        }
+
+        .lion-eye.left { left: 20px; }
+        .lion-eye.right { right: 20px; }
+
+        .lion-eye::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #000;
+            border-radius: 50%;
+            top: 5px;
+            left: 5px;
+        }
+
+        .lion-nose {
+            position: absolute;
+            width: 30px;
+            height: 25px;
+            background: #8B4513;
+            border-radius: 50%;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .lion-nose::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 10px;
+            background: #000;
+            border-radius: 50%;
+            top: 8px;
+            left: 7.5px;
+        }
+
+        .lion-mane {
+            position: absolute;
+            width: 130px;
+            height: 110px;
+            background: radial-gradient(circle, #FFD700 0%, #FFA500 100%);
+            border-radius: 50%;
+            top: -10px;
+            left: -10px;
+            z-index: -1;
+        }
+
+        .lion-ear {
+            position: absolute;
+            width: 25px;
+            height: 30px;
+            background: #FFD700;
+            border-radius: 50% 50% 0 0;
+            top: -10px;
+        }
+
+        .lion-ear.left { left: 15px; transform: rotate(-15deg); }
+        .lion-ear.right { right: 15px; transform: rotate(15deg); }
+
+        @keyframes lionDance {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(-3deg); }
+            50% { transform: translateY(-20px) rotate(0deg); }
+            75% { transform: translateY(-10px) rotate(3deg); }
+        }
+
+        /* 对联显示区域 */
+        .couplet-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+            padding: 30px 40px;
+            border-radius: 20px;
+            border: 4px solid #FFD700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            z-index: 1000;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .couplet-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .couplet-popup::before,
+        .couplet-popup::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 100%;
+            background: linear-gradient(to bottom, #FFD700, #FFA500);
+            top: 0;
+        }
+
+        .couplet-popup::before { left: 15px; }
+        .couplet-popup::after { right: 15px; }
+
+        .couplet-title {
+            font-size: 20px;
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        .couplet-content {
+            font-size: 28px;
+            color: #FFF;
+            margin: 10px 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .couplet-popup h3 {
+            color: #FFA500;
+            margin-top: 15px;
+            font-size: 18px;
+        }
+
+        .close-btn {
+            margin-top: 20px;
+            padding: 10px 30px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border: none;
+            border-radius: 25px;
+            color: #8B0000;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        /* 烟花效果 */
+        .firework {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* 提示文字 */
+        .hint-text {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FFD700;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        /* 收集到的对联列表 */
+        .collected-couplets {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: rgba(139, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 15px;
+            border: 3px solid #FFD700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            max-width: 200px;
+        }
+
+        .collected-couplets h4 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .collected-couplet-item {
+            color: #FFA500;
+            font-size: 14px;
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(255, 165, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 24px;
+            }
+            
+            .status-panel {
+                top: 80px;
+                right: 10px;
+                padding: 10px 15px;
+            }
+            
+            .score-display {
+                font-size: 18px;
+            }
+            
+            .dragon-head {
+                width: 90px;
+                height: 75px;
+            }
+            
+            .lion-head {
+                width: 85px;
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景装饰 -->
+    <div class="background-decoration">
+        <div class="lantern" style="top: 20px; left: 5%;"></div>
+        <div class="lantern" style="top: 20px; right: 5%; animation-delay: 0.5s;"></div>
+        <div class="lantern" style="top: 30%; left: 2%; animation-delay: 1s;"></div>
+        <div class="lantern" style="top: 30%; right: 2%; animation-delay: 1.5s;"></div>
+        <div class="lantern" style="bottom: 10%; left: 5%; animation-delay: 0.3s;"></div>
+        <div class="lantern" style="bottom: 10%; right: 5%; animation-delay: 0.8s;"></div>
+    </div>
+
+    <!-- 游戏容器 -->
+    <div class="game-container">
+        <!-- 标题区域 -->
+        <div class="title-area">
+            <h1 class="game-title">🐉 春节舞龙舞狮喜庆对联游戏 🦁</h1>
+            <p class="game-subtitle">点击龙头或狮头获取喜庆对联，收集更多对联赢取高分！</p>
+        </div>
+
+        <!-- 分数面板 -->
+        <div class="status-panel">
+            <div class="score-display">🎯 积分: <span id="score">0</span></div>
+            <div class="couplet-count">📜 收集对联: <span id="coupletCount">0</span>/10</div>
+        </div>
+
+        <!-- 收集到的对联 -->
+        <div class="collected-couplets">
+            <h4>已收集对联</h4>
+            <div id="collectedList"></div>
+        </div>
+
+        <!-- 游戏区域 -->
+        <div class="game-area">
+            <!-- 舞龙 -->
+            <div class="dragon" id="dragon" style="left: 20%; top: 30%;">
+                <div class="dragon-head">
+                    <div class="dragon-horn left"></div>
+                    <div class="dragon-horn right"></div>
+                    <div class="dragon-eye left"></div>
+                    <div class="dragon-eye right"></div>
+                    <div class="dragon-mouth"></div>
+                    <div class="dragon-beard"></div>
+                </div>
+                <div class="dragon-body"></div>
+                <div class="dragon-body"></div>
+                <div class="dragon-body"></div>
+                <div class="dragon-body"></div>
+            </div>
+
+            <!-- 舞狮 -->
+            <div class="lion" id="lion" style="right: 20%; top: 40%;">
+                <div class="lion-mane"></div>
+                <div class="lion-head">
+                    <div class="lion-ear left"></div>
+                    <div class="lion-ear right"></div>
+                    <div class="lion-eye left"></div>
+                    <div class="lion-eye right"></div>
+                    <div class="lion-nose"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 提示文字 -->
+        <div class="hint-text">✨ 点击舞龙或舞狮获取喜庆对联 ✨</div>
+    </div>
+
+    <!-- 对联弹窗 -->
+    <div class="couplet-popup" id="coupletPopup">
+        <div class="couplet-title" id="coupletTitle">🎉 喜获对联 🎉</div>
+        <div class="couplet-content" id="coupletUpper"></div>
+        <div class="couplet-content" id="coupletLower"></div>
+        <h3 id="coupletMeaning"></h3>
+        <button class="close-btn" onclick="closePopup()">🎊 收下！</button>
+    </div>
+
+    <script>
+        // 对联数据
+        const couplets = [
+            {
+                upper: "龙腾虎跃春光好",
+                lower: "鸟语花香气象新",
+                meaning: "寓意：新的一年生机勃勃，万物更新"
+            },
+            {
+                upper: "迎春接福喜气洋洋",
+                lower: "辞旧迎新欢声笑语",
+                meaning: "寓意：新年带来欢乐和希望"
+            },
+            {
+                upper: "春风得意马蹄疾",
+                lower: "一日看尽长安花",
+                meaning: "寓意：事业顺利，前程似锦"
+            },
+            {
+                upper: "家和万事兴",
+                lower: "人勤百业旺",
+                meaning: "寓意：家庭和睦，事业兴旺"
+            },
+            {
+                upper: "金玉满堂家富贵",
+                lower: "福寿双全人康宁",
+                meaning: "寓意：家庭富裕，健康长寿"
+            },
+            {
+                upper: "春回大地千山秀",
+                lower: "日暖神州万木荣",
+                meaning: "寓意：春天到来，万物复苏"
+            },
+            {
+                upper: "五福临门家业旺",
+                lower: "三阳开泰岁华新",
+                meaning: "寓意：福气满满，新年新气象"
+            },
+            {
+                upper: "龙舞祥云开泰运",
+                lower: "狮踏春潮启新程",
+                meaning: "寓意：龙狮共舞，开启美好未来"
+            },
+            {
+                upper: "瑞雪兆丰年",
+                lower: "红梅报新春",
+                meaning: "寓意：丰收在望，新年到来"
+            },
+            {
+                upper: "年年有余庆",
+                lower: "岁岁平安福",
+                meaning: "寓意：年年有收获，岁岁保平安"
+            }
+        ];
+
+        // 游戏状态
+        let score = 0;
+        let collectedCouplets = [];
+        let usedCouplets = [];
+
+        // 获取元素
+        const dragon = document.getElementById('dragon');
+        const lion = document.getElementById('lion');
+        const popup = document.getElementById('coupletPopup');
+        const scoreDisplay = document.getElementById('score');
+        const coupletCountDisplay = document.getElementById('coupletCount');
+        const collectedList = document.getElementById('collectedList');
+
+        // 点击龙头显示对联
+        dragon.addEventListener('click', function(e) {
+            showCouplet('dragon', e.clientX, e.clientY);
+        });
+
+        // 点击狮头显示对联
+        lion.addEventListener('click', function(e) {
+            showCouplet('lion', e.clientX, e.clientY);
+        });
+
+        // 显示对联
+        function showCouplet(source, x, y) {
+            // 获取未使用的对联
+            const availableCouplets = couplets.filter((c, index) => !usedCouplets.includes(index));
+            
+            if (availableCouplets.length === 0) {
+                usedCouplets = [];
+                availableCouplets.push(...couplets);
+            }
+
+            // 随机选择对联
+            const randomIndex = Math.floor(Math.random() * availableCouplets.length);
+            const selectedCouplet = availableCouplets[randomIndex];
+            const originalIndex = couplets.indexOf(selectedCouplet);
+            
+            usedCouplets.push(originalIndex);
+
+            // 更新弹窗内容
+            document.getElementById('coupletTitle').textContent = source === 'dragon' ? '🐉 龙赐福联 🐉' : '🦁 狮献吉联 🦁';
+            document.getElementById('coupletUpper').textContent = selectedCouplet.upper;
+            document.getElementById('coupletLower').textContent = selectedCouplet.lower;
+            document.getElementById('coupletMeaning').textContent = selectedCouplet.meaning;
+
+            // 显示弹窗
+            popup.classList.add('show');
+
+            // 创建烟花效果
+            createFireworks(x, y);
+
+            // 更新分数
+            score += 10;
+            scoreDisplay.textContent = score;
+
+            // 收集对联
+            if (!collectedCouplets.includes(originalIndex)) {
+                collectedCouplets.push(originalIndex);
+                coupletCountDisplay.textContent = collectedCouplets.length;
+                
+                // 添加到收集列表
+                const item = document.createElement('div');
+                item.className = 'collected-couplet-item';
+                item.textContent = `${selectedCouplet.upper} / ${selectedCouplet.lower}`;
+                collectedList.appendChild(item);
+            }
+
+            // 检查是否收集完所有对联
+            if (collectedCouplets.length === couplets.length) {
+                setTimeout(() => {
+                    alert('🎊 恭喜您！收集完所有对联！总积分: ' + score + ' 🎊');
+                }, 500);
+            }
+        }
+
+        // 关闭弹窗
+        function closePopup() {
+            popup.classList.remove('show');
+        }
+
+        // 创建烟花效果
+        function createFireworks(x, y) {
+            const colors = ['#FF0000', '#FFD700', '#FFA500', '#FF6347', '#FF4500'];
+            const particleCount = 20;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                document.body.appendChild(particle);
+
+                // 随机方向
+                const angle = (Math.PI * 2 * i) / particleCount;
+                const velocity = 5 + Math.random() * 10;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+
+                let opacity = 1;
+                let posX = x;
+                let posY = y;
+
+                function animateParticle() {
+                    posX += vx;
+                    posY += vy;
+                    opacity -= 0.02;
+
+                    particle.style.left = posX + 'px';
+                    particle.style.top = posY + 'px';
+                    particle.style.opacity = opacity;
+
+                    if (opacity > 0) {
+                        requestAnimationFrame(animateParticle);
+                    } else {
+                        particle.remove();
+                    }
+                }
+
+                requestAnimationFrame(animateParticle);
+            }
+        }
+
+        // 自动移动舞龙和舞狮
+        function moveCreatures() {
+            const gameArea = document.querySelector('.game-area');
+            const areaRect = gameArea.getBoundingClientRect();
+            
+            // 舞龙移动
+            const dragonRect = dragon.getBoundingClientRect();
+            const newDragonX = Math.random() * (areaRect.width - dragonRect.width);
+            const newDragonY = Math.random() * (areaRect.height - dragonRect.height);
+            dragon.style.left = newDragonX + 'px';
+            dragon.style.top = newDragonY + 'px';
+
+            // 舞狮移动
+            const lionRect = lion.getBoundingClientRect();
+            const newLionX = Math.random() * (areaRect.width - lionRect.width);
+            const newLionY = Math.random() * (areaRect.height - lionRect.height);
+            lion.style.right = 'auto';
+            lion.style.left = newLionX + 'px';
+            lion.style.top = newLionY + 'px';
+
+            // 确保不重叠
+            setTimeout(moveCreatures, 3000 + Math.random() * 2000);
+        }
+
+        // 开始自动移动
+        setTimeout(moveCreatures, 2000);
+
+        // 点击弹窗外部关闭
+        document.addEventListener('click', function(e) {
+            if (e.target === popup) {
+                closePopup();
+            }
+        });
+
+        // 按ESC关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePopup();
+            }
+        });
+    </script>
+</body>
+</html>
